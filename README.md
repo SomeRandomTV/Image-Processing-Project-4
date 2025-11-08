@@ -347,7 +347,7 @@ SUITS/Hearts0.jpg   # First Hearts template
 - Template matching: 10-50ms (depends on number of templates)
 - Total pipeline: 100-200ms on modern hardware
 
-## Limitations
+## Limitations/Assumptions
 
 - Requires standard playing card layout (rank and suit in top-left corner)
 - Sensitive to lighting conditions (shadows can affect thresholding)
@@ -356,28 +356,3 @@ SUITS/Hearts0.jpg   # First Hearts template
 - Does not handle overlapping or partially occluded cards
 - Limited to grayscale comparison (color information not used)
 
-## Future Enhancements
-
-Potential improvements:
-- Multi-scale template matching for size invariance
-- Feature-based matching (SIFT/ORB) for rotation invariance
-- Deep learning classification for improved accuracy
-- Batch processing mode for multiple cards
-- Real-time video stream processing
-- Color-based suit detection for improved reliability
-
-## License
-
-This project is provided as-is for educational purposes.
-
-## Contributing
-
-To contribute:
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Submit a pull request
-
-## Contact
-
-For questions or issues, please open an issue on the repository.
