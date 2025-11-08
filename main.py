@@ -1,7 +1,6 @@
 import cv2 as cv
 import numpy as np
 import os
-import time
 from card_rotator import CardRotator
 from card_detector import CardDetector, CardIdentity
 
@@ -210,103 +209,6 @@ def process_card(image: np.ndarray, image_name: str = "card") -> None:
     print("\nPress any key to close windows...")
     cv.waitKey(0)
     cv.destroyAllWindows()
-    
-    # Ask if user wants to see intermediate steps
-    viz_choice = input("\nWould you like to see the intermediate processing steps? (y/n): ").strip().lower()
-    if viz_choice == 'y':
-        detector.visualize_intermediate_steps(card_identity)
-    
-    # Ask user if they want to save the detected rank and suit
-    if card_identity.rank_img is not None and card_identity.suit_img is not None:
-        save_choice = input("\nWould you like to save the detected rank and suit images? (y/n): ").strip().lower()
-        
-        if save_choice == 'y':
-            save_detected_images(card_identity, image_name)
-
-
-def save_detected_images(card_identity: CardIdentity, image_name: str) -> None:
-    """
-    Save the detected rank and suit images to their respective folders.
-    If unknown, prompt user for the correct rank/suit.
-    
-    Args:
-        card_identity: CardIdentity object containing the detected images
-        image_name: Original image name (used for generating unique filenames)
-    """
-    rank_to_save = card_identity.rank
-    suit_to_save = card_identity.suit
-    
-    # If rank is unknown, ask user for it
-    if card_identity.rank == "Unknown":
-        print("\n⚠ Rank was not detected.")
-        rank_to_save = input("Please enter the rank (e.g., Ace, Two, Three, ..., King): ").strip().capitalize()
-        if not rank_to_save:
-            print("   ✗ Skipping rank save - no input provided")
-            rank_to_save = None
-    
-    # If suit is unknown, ask user for it
-    if card_identity.suit == "Unknown":
-        print("\n⚠ Suit was not detected.")
-        suit_to_save = input("Please enter the suit (Spades, Diamonds, Clubs, Hearts): ").strip().capitalize()
-        if not suit_to_save:
-            print("   ✗ Skipping suit save - no input provided")
-            suit_to_save = None
-    
-    # Save rank image
-    if card_identity.rank_img is not None and rank_to_save:
-        rank_folder = "./RANKS/"
-        os.makedirs(rank_folder, exist_ok=True)
-        
-        # Find next available number for this rank
-        rank_number = get_next_number(rank_folder, rank_to_save)
-        rank_filename = os.path.join(rank_folder, f"{rank_to_save}{rank_number}.jpg")
-        
-        cv.imwrite(rank_filename, card_identity.rank_img)
-        print(f"   ✓ Saved rank image: {rank_filename}")
-    
-    # Save suit image
-    if card_identity.suit_img is not None and suit_to_save:
-        suit_folder = "./SUITS/"
-        os.makedirs(suit_folder, exist_ok=True)
-        
-        # Find next available number for this suit
-        suit_number = get_next_number(suit_folder, suit_to_save)
-        suit_filename = os.path.join(suit_folder, f"{suit_to_save}{suit_number}.jpg")
-        
-        cv.imwrite(suit_filename, card_identity.suit_img)
-        print(f"   ✓ Saved suit image: {suit_filename}")
-
-
-def get_next_number(folder: str, prefix: str) -> int:
-    """
-    Find the next available number for a given prefix in a folder.
-    
-    Args:
-        folder: Directory to search in
-        prefix: Filename prefix (e.g., "Ace", "Spades")
-    
-    Returns:
-        Next available number (0-9, cycling back to 0 if all are taken)
-    """
-    existing_files = []
-    if os.path.exists(folder):
-        existing_files = [f for f in os.listdir(folder) if f.startswith(prefix) and f.endswith('.jpg')]
-    
-    # Extract numbers from existing files
-    used_numbers = set()
-    for filename in existing_files:
-        # Remove prefix and .jpg extension
-        num_str = filename[len(prefix):-4]
-        if num_str.isdigit():
-            used_numbers.add(int(num_str))
-    
-    # Find first available number 0-9
-    for i in range(10):
-        if i not in used_numbers:
-            return i
-    
-    # If all 0-9 are taken, start overwriting from 0
-    return 0 
 
 
 def main():

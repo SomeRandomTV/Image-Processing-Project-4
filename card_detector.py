@@ -46,48 +46,71 @@ class CardDetector:
     def _load_ranks(self) -> List['TrainRank']:
         """
         Load all rank template images from the RANKS directory.
+        Loads any image file regardless of name.
         
         Returns:
             List of TrainRank objects containing template images and names
         """
         train_ranks = []
-        rank_names = ['Ace', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven',
-                      'Eight', 'Nine', 'Ten', 'Jack', 'Queen', 'King']
         
-        for rank_name in rank_names:
-            filename = os.path.join(self.ranks_path, f'{rank_name}.jpg')
-            if os.path.exists(filename):
-                img = cv.imread(filename, cv.IMREAD_GRAYSCALE)
-                if img is not None:
-                    train_ranks.append(TrainRank(rank_name, img))
-                else:
-                    print(f"Warning: Could not load rank image: {filename}")
+        if not os.path.exists(self.ranks_path):
+            print(f"Warning: Ranks directory not found: {self.ranks_path}")
+            return train_ranks
+        
+        # Get all files in the directory
+        for filename in sorted(os.listdir(self.ranks_path)):
+            filepath = os.path.join(self.ranks_path, filename)
+            
+            # Skip directories and hidden files
+            if os.path.isdir(filepath) or filename.startswith('.'):
+                continue
+            
+            # Try to load as image
+            img = cv.imread(filepath, cv.IMREAD_GRAYSCALE)
+            if img is not None:
+                # Use filename without extension as the name
+                name = os.path.splitext(filename)[0]
+                train_ranks.append(TrainRank(name, img))
+                print(f"Loaded rank: {filename}")
             else:
-                print(f"Warning: Rank image not found: {filename}")
+                print(f"Warning: Could not load as image: {filename}")
         
+        print(f"Total ranks loaded: {len(train_ranks)}")
         return train_ranks
 
     def _load_suits(self) -> List['TrainSuit']:
         """
         Load all suit template images from the SUITS directory.
+        Loads any image file regardless of name.
         
         Returns:
             List of TrainSuit objects containing template images and names
         """
         train_suits = []
-        suit_names = ['Spades', 'Diamonds', 'Clubs', 'Hearts']
         
-        for suit_name in suit_names:
-            filename = os.path.join(self.suits_path, f'{suit_name}.jpg')
-            if os.path.exists(filename):
-                img = cv.imread(filename, cv.IMREAD_GRAYSCALE)
-                if img is not None:
-                    train_suits.append(TrainSuit(suit_name, img))
-                else:
-                    print(f"Warning: Could not load suit image: {filename}")
+        if not os.path.exists(self.suits_path):
+            print(f"Warning: Suits directory not found: {self.suits_path}")
+            return train_suits
+        
+        # Get all files in the directory
+        for filename in sorted(os.listdir(self.suits_path)):
+            filepath = os.path.join(self.suits_path, filename)
+            
+            # Skip directories and hidden files
+            if os.path.isdir(filepath) or filename.startswith('.'):
+                continue
+            
+            # Try to load as image
+            img = cv.imread(filepath, cv.IMREAD_GRAYSCALE)
+            if img is not None:
+                # Use filename without extension as the name
+                name = os.path.splitext(filename)[0]
+                train_suits.append(TrainSuit(name, img))
+                print(f"Loaded suit: {filename}")
             else:
-                print(f"Warning: Suit image not found: {filename}")
+                print(f"Warning: Could not load as image: {filename}")
         
+        print(f"Total suits loaded: {len(train_suits)}")
         return train_suits
 
     # ---------------- Card Corner Isolation ----------------
@@ -230,6 +253,12 @@ class CardDetector:
         
         if best_suit_diff > self.SUIT_DIFF_MAX:
             best_suit_match = "Unknown"
+
+        if best_rank_match != "Unknown":
+            best_rank_match = ''.join([c for c in best_rank_match if not c.isdigit()])
+        
+        if best_suit_match != "Unknown":
+            best_suit_match = ''.join([c for c in best_suit_match if not c.isdigit()])
         
         return CardIdentity(
             rank=best_rank_match,
