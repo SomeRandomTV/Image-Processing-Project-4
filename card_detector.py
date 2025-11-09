@@ -142,10 +142,10 @@ class CardDetector:
         
         # Sample a white pixel to determine threshold level
         # This makes it adaptive to different card designs
-        white_level = corner_zoom[15, int((self.CORNER_WIDTH * 4) / 2)]
-        thresh_level = white_level - self.CARD_THRESH
-        if thresh_level <= 0:
-            thresh_level = 1
+        white_level = int(corner_zoom[15, int((self.CORNER_WIDTH * 4) / 2)])
+        
+        # Calculate threshold level with bounds checking to prevent overflow
+        thresh_level = max(1, white_level - self.CARD_THRESH)
         
         # Threshold to isolate rank and suit (white background, black symbols)
         _, corner_thresh = cv.threshold(corner_zoom, thresh_level, 255, cv.THRESH_BINARY_INV)
@@ -254,11 +254,18 @@ class CardDetector:
         if best_suit_diff > self.SUIT_DIFF_MAX:
             best_suit_match = "Unknown"
 
+        # Clean up names: extract the base card name (before any underscore or trailing digits)
         if best_rank_match != "Unknown":
-            best_rank_match = ''.join([c for c in best_rank_match if not c.isdigit()])
+            # Split on underscore and take first part (e.g., "Eight_webcam_capture_123" -> "Eight")
+            best_rank_match = best_rank_match.split('_')[0]
+            # Then strip trailing digits (e.g., "Eight0" -> "Eight")
+            best_rank_match = best_rank_match.rstrip('0123456789')
         
         if best_suit_match != "Unknown":
-            best_suit_match = ''.join([c for c in best_suit_match if not c.isdigit()])
+            # Split on underscore and take first part
+            best_suit_match = best_suit_match.split('_')[0]
+            # Then strip trailing digits
+            best_suit_match = best_suit_match.rstrip('0123456789')
         
         return CardIdentity(
             rank=best_rank_match,
