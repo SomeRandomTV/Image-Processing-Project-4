@@ -115,7 +115,6 @@ class CardRotator:
         box = cv.boxPoints(rect).astype(np.float32)
         
         # Order the points: top-left, top-right, bottom-right, bottom-left
-        # This ordering is critical for correct perspective transform
         def order_points(pts):
             # Initialize ordered coordinates
             rect = np.zeros((4, 2), dtype="float32")
